@@ -1,0 +1,360 @@
+'''Stochastic gradient descent''' (often abbreviated '''SGD''') is an [[iterative method]] for [[Mathematical optimization|optimizing]] an [[objective function]] with suitable smoothness properties (e.g. [[Differentiable function|differentiable]] or [[Subgradient method|subdifferentiable]]). It is called '''stochastic''' because the method uses randomly selected (or shuffled) samples to evaluate the gradients, hence SGD can be regarded as a [[stochastic approximation]] of [[gradient descent]] optimization. The ideas can be traced back<ref>{{cite journal | last = Mei | first = Song | title = A mean field view of the landscape of two-layer neural networks | journal = Proceedings of the National Academy of Sciences | volume =  115| issue =  33| year = 2018 | pages =  E7665–E7671| jstor =  | doi = 10.1073/pnas.1806579115 | pmid = 30054315 | pmc = 6099898 }}</ref> at least to the 1951 article titled "A Stochastic Approximation Method" by [[Herbert Robbins]] and [[Sutton Monro]], who proposed with detailed analysis a root-finding method now called the [[stochastic approximation|Robbins–Monro algorithm]].
+
+== Background ==
+{{Main|M-estimation}}
+{{See also|Estimating equation}}
+Both [[statistics|statistical]] [[M-estimation|estimation]] and [[machine learning]] consider the problem of [[Mathematical optimization|minimizing]] an [[objective function]] that has the form of a sum:
+: <math>Q(w) = \frac{1}{n}\sum_{i=1}^n Q_i(w),</math>
+where the [[parametric statistics|parameter]] <math>w</math> that minimizes <math>Q(w)</math> is to be [[estimator|estimated]]. Each summand function <math>Q_i</math> is typically associated with the <math>i</math>-th [[Observation (statistics)|observation]] in the [[data set]] (used for training).
+
+In classical statistics, sum-minimization problems arise in [[least squares]] and in [[maximum-likelihood estimation]] (for independent observations).  The general class of estimators that arise as minimizers of sums are called [[M-estimator]]s. However, in statistics, it has been long recognized that requiring even local minimization is too restrictive for some problems of maximum-likelihood estimation.<ref>{{cite journal | last = Ferguson | first = Thomas S. | title = An inconsistent maximum likelihood estimate | journal = Journal of the American Statistical Association | volume = 77 | issue = 380 | year = 1982 | pages = 831–834 | jstor = 2287314 | doi = 10.1080/01621459.1982.10477894 }}</ref> Therefore, contemporary statistical theorists often consider [[stationary point]]s of the [[likelihood function]] (or zeros of its derivative, the [[Score (statistics)|score function]], and other [[estimating equations]]).
+
+The sum-minimization problem also arises for [[empirical risk minimization]]. In this case, <math>Q_i(w)</math> is the value of the [[loss function]] at <math>i</math>-th example, and <math>Q(w)</math> is the empirical risk.
+
+When used to minimize the above function, a standard (or "batch") [[gradient descent]] method would perform the following iterations :
+: <math>w := w - \eta \nabla Q(w) = w - \eta \sum_{i=1}^n \nabla Q_i(w)/n,</math>
+where <math>\eta</math> is a step size (sometimes called the ''[[learning rate]]'' in machine learning).
+
+In many cases, the summand functions have a simple form that enables inexpensive evaluations of the sum-function and the sum gradient. For example, in statistics, [[exponential families|one-parameter exponential families]] allow economical function-evaluations and gradient-evaluations.
+
+However, in other cases, evaluating the sum-gradient may require expensive evaluations of the gradients from all summand functions. When the training set is enormous and no simple formulas exist, evaluating the sums of gradients becomes very expensive, because evaluating the gradient requires evaluating all the summand functions' gradients. To economize on the computational cost at every iteration, stochastic gradient descent [[sampling (statistics)|samples]] a subset of summand functions at every step. This is very
+effective in the case of large-scale machine learning problems.<ref>{{Cite conference |first1=Léon |last1=Bottou |author1-link=Léon Bottou |last2=Bousquet |first2=Olivier |title=The Tradeoffs of Large Scale Learning |url=http://leon.bottou.org/papers/bottou-bousquet-2008 |conference=[[Advances in Neural Information Processing Systems]] |volume=20 |pages=161–168 |year=2008}}</ref>
+
+== Iterative method ==
+[[Image:stogra.png|thumb|right|Fluctuations in the total objective function as gradient steps with respect to mini-batches are taken.]]
+
+In stochastic (or "on-line") gradient descent, the true gradient of <math>Q(w)</math> is approximated by a gradient at a single example:
+: <math>w := w - \eta \nabla Q_i(w).</math>
+As the algorithm sweeps through the training set, it performs the above update for each training example. Several passes can be made over the training set until the algorithm converges. If this is done, the data can be shuffled for each pass to prevent cycles. Typical implementations may use an [[adaptive learning rate]] so that the algorithm converges.
+
+In pseudocode, stochastic gradient descent can be presented as follows:
+<div style="margin-left: 35px; width: 600px">
+{{framebox|blue}}
+* Choose an initial vector of parameters <math>w</math> and learning rate <math>\eta</math>.
+* Repeat until an approximate minimum is obtained:
+** Randomly shuffle examples in the training set.
+** For <math> i=1, 2, ..., n</math>, do:
+*** <math>\! w := w - \eta \nabla Q_i(w).</math>
+{{frame-footer}}
+</div>
+
+A compromise between computing the true gradient and the gradient at a single example is to compute the gradient against more than one training example (called a "mini-batch") at each step.  This can perform significantly better than "true" stochastic gradient descent described, because the code can make use of [[Vectorization (mathematics)|vectorization]] libraries rather than computing each step separately.  It may also result in smoother convergence, as the gradient computed at each step is averaged over more training examples.
+
+The convergence of stochastic gradient descent has been analyzed using the theories of [[convex optimization|convex minimization]] and of [[stochastic approximation]]. Briefly, when the [[learning rate]]s <math>\eta</math> decrease with an appropriate rate,
+and subject to relatively mild assumptions, stochastic gradient descent converges [[almost surely]] to a global minimum 
+when the objective function is [[convex function|convex]] or [[pseudoconvex function|pseudoconvex]], 
+and otherwise converges almost surely to a local minimum.<ref>{{Cite book
+     |last=Bottou
+     |first=Léon
+     |authorlink=Léon Bottou
+     |contribution=Online Algorithms and Stochastic Approximations
+     |year=1998
+     |title=Online Learning and Neural Networks
+     |publisher=Cambridge University Press
+     |url=http://leon.bottou.org/papers/bottou-98x
+     |isbn=978-0-521-65263-6
+     |postscript=<!-- Bot inserted parameter. Either remove it; or change its value to "." for the cite to end in a ".", as necessary. -->{{inconsistent citations}}
+}}</ref><ref>{{cite news
+     |last=Kiwiel
+     |first=Krzysztof C.
+     |title=Convergence and efficiency of subgradient methods for quasiconvex minimization
+     |journal=Mathematical Programming, Series A
+     |publisher=Springer|location=Berlin, Heidelberg
+     |issn=0025-5610|pages=1–25|volume=90|issue=1
+     |doi=10.1007/PL00011414|year=2001 |mr=1819784}}</ref>
+This is in fact a consequence of the [[Robbins-Siegmund theorem]].<ref>{{Cite book
+     |last1=Robbins
+     |first1=Herbert
+     |author1-link=Herbert Robbins
+     |last2=Siegmund
+     |first2=David O.
+     |author2-link=David O. Siegmund
+     |contribution=A convergence theorem for non negative almost supermartingales and some applications
+     |title=Optimizing Methods in Statistics
+     |publisher=Academic Press
+     |year=1971
+     |editor-last=Rustagi
+     |editor-first=Jagdish S.
+     |postscript=<!-- Bot inserted parameter. Either remove it; or change its value to "." for the cite to end in a ".", as necessary. -->{{inconsistent citations}}
+}}
+</ref>
+
+== Example ==
+Let's suppose we want to fit a straight line <math>y = \! w_1 + w_2 x</math> to a training set with observations<math> (x_1, x_2, \ldots, x_n)</math> and corresponding estimated responses <math> (\hat{y_1}, \hat{y_2}, \ldots, \hat{y_n})</math> using [[least squares]]. The objective function to be minimized is:
+: <math>Q(w) = \sum_{i=1}^n Q_i(w) = \sum_{i=1}^n \left(\hat{y_i}-y_i\right)^2 = \sum_{i=1}^n \left(w_1 + w_2 x_i - y_i\right)^2.</math>
+
+The last line in the above pseudocode for this specific problem will become:
+: <math>\begin{bmatrix} w_1 \\ w_2 \end{bmatrix} :=
+    \begin{bmatrix} w_1 \\ w_2 \end{bmatrix}
+    - \eta \begin{bmatrix} \frac{\partial}{\partial w_1} (w_1 + w_2 x_i - y_i)^2 \\
+            \frac{\partial}{\partial w_2} (w_1 + w_2 x_i - y_i)^2 \end{bmatrix} =
+    \begin{bmatrix} w_1 \\ w_2 \end{bmatrix}
+    -  \eta  \begin{bmatrix} 2 (w_1 + w_2 x_i - y_i) \\ 2 x_i(w_1 + w_2 x_i - y_i) \end{bmatrix}.</math>
+
+Note that in each iteration (also called update), only the gradient evaluated at a single point <math> x_i </math> instead of evaluating at the set of all samples.
+
+The key difference compared to standard (Batch) Gradient Descent is that only one piece of data from the dataset is used to calculate the step, and the piece of data is picked randomly at each step.
+
+== Notable applications ==
+Stochastic gradient descent is a popular algorithm for training a wide range of models in [[machine learning]], including (linear) [[support vector machine]]s, [[logistic regression]] (see, e.g., [[Vowpal Wabbit]]) and [[graphical model]]s.<ref>Jenny Rose Finkel, Alex Kleeman, Christopher D. Manning (2008). [http://www.aclweb.org/anthology/P08-1109 Efficient, Feature-based, Conditional Random Field Parsing]. Proc. Annual Meeting of the ACL.</ref> When combined with the [[backpropagation]] algorithm, it is the ''de facto'' standard algorithm for training [[artificial neural network]]s.<ref>[http://yann.lecun.com/exdb/publis/pdf/lecun-98b.pdf LeCun, Yann A., et al. "Efficient backprop." Neural networks: Tricks of the trade. Springer Berlin Heidelberg, 2012. 9-48]</ref> Its use has been also reported in the [[Geophysics]] community, specifically to applications of Full Waveform Inversion (FWI).<ref>[http://library.seg.org/doi/abs/10.1190/1.3627777 Díaz, Esteban and Guitton, Antoine. "Fast full waveform inversion with random shot decimation". SEG Technical Program Expanded Abstracts, 2011. 2804-2808]</ref>
+
+Stochastic gradient descent competes with the [[limited-memory BFGS|L-BFGS]] algorithm,{{Citation needed|date=July 2015}} which is also widely used. Stochastic gradient descent has been used since at least 1960 for training [[linear regression]] models, originally under the name [[ADALINE]].<ref>{{cite web |author=Avi Pfeffer |title=CS181 Lecture 5 — Perceptrons |url=http://www.seas.harvard.edu/courses/cs181/files/lecture05-notes.pdf |publisher=Harvard University }}{{Dead link|date=June 2018 |bot=InternetArchiveBot |fix-attempted=no }}</ref>
+
+Another stochastic gradient descent algorithm is the [[Least mean squares filter|least mean squares (LMS)]] adaptive filter.
+
+==Extensions and variants==
+Many improvements on the basic stochastic gradient descent algorithm have been proposed and used. In particular, in machine learning, the need to set a [[learning rate]] (step size) has been recognized as problematic. Setting this parameter too high can cause the algorithm to diverge{{citation needed|date=October 2017}}; setting it too low makes it slow to converge{{citation needed|date=October 2017}}. A conceptually simple extension of stochastic gradient descent makes the learning rate a decreasing function {{mvar|η<sub>t</sub>}} of the iteration number {{mvar|t}}, giving a ''learning rate schedule'', so that the first iterations cause large changes in the parameters, while the later ones do only fine-tuning. Such schedules have been known since the work of MacQueen on [[K-means clustering|{{mvar|k}}-means clustering]].<ref>Cited by {{cite conference |last1=Darken |first1=Christian |first2=John |last2=Moody |title=Fast adaptive k-means clustering: some empirical results |year=1990 |conference=Int'l Joint Conf. on Neural Networks (IJCNN) |publisher=IEEE|url=http://ieeexplore.ieee.org/abstract/document/5726679/}}</ref> Some practical guidance on choosing the step size in several variants of SGD is given in Sects. 4.4, 6.6, and 7.5 of <ref>Spall, J. C. (2003), Introduction to Stochastic Search and Optimization: Estimation, Simulation, and Control, Wiley, Hoboken, NJ</ref>. 
+
+===Implicit updates (ISGD)===
+As mentioned earlier, classical stochastic gradient descent is generally sensitive to [[learning rate]] {{mvar|η}}. Fast convergence requires large learning rates but this may induce numerical instability. The problem can be largely solved{{citation needed|date=May 2019}} by considering ''implicit updates'' whereby the stochastic gradient is evaluated at the next iterate rather than the current one:
+:<math>w^{new} := w^{old} - \eta \nabla Q_i(w^{new}).</math>
+
+This equation is implicit since <math>w^{new}</math> appears on both sides of the equation. It is a stochastic form of the [[proximal gradient method]] since the update
+can also be written as:
+:<math>w^{new} := \arg\min_w \{ Q_i(w) + \frac{1}{2\eta} ||w - w^{old}||^2 \}.</math>
+
+As an example, 
+consider least squares with features <math>x_1, \ldots, x_n \in\mathbb{R}^p</math> and observations
+<math>y_1, \ldots, y_n\in\mathbb{R}</math>. We wish to solve:
+:<math>\min_w \sum_{j=1}^n (y_j - x_j'w)^2.</math>
+Note that <math>x</math> could have "1" as the first element to include an intercept. Classical stochastic gradient descent proceeds as follows:
+:<math>w^{new} = w^{old} + \eta (y_i - x_i'w^{old}) x_i</math>
+
+where <math>i</math> is uniformly sampled between 1 and <math>n</math>. Although theoretical convergence of this procedure happens under relatively mild assumptions, in practice the procedure can be quite unstable. In particular, when <math>\eta</math> is misspecified so that <math>I - \eta x_i x_i'</math> has large absolute eigenvalues with high probability, the procedure may diverge numerically within a few iterations. In contrast, ''implicit stochastic gradient descent'' (shortened as ISGD) can be solved in closed-form as:
+:<math>w^{new} = w^{old} + \frac{\eta}{1 + \eta ||x_i||^2} (y_i - x_i'w^{old}) x_i.</math>
+
+This procedure will remain numerically stable virtually for all <math>\eta</math> as the [[learning rate]] is now normalized. Such comparison between classical and implicit stochastic gradient descent in the least squares problem is very similar to the comparison between [[Least mean squares filter|least mean squares (LMS)]] and 
+[[Least mean squares filter#Normalized least mean squares filter (NLMS)|normalized least mean squares filter (NLMS)]].
+
+Even though a closed-form solution for ISGD is only possible in least squares, the procedure can be efficiently implemented in a wide range of models. Specifically, suppose that <math>Q_i(w)</math> depends on <math>w</math> only through a linear combination with features <math>x_i</math>, so that we can write <math>\nabla_w Q_i(w) = -q(x_i'w) x_i</math>, where 
+<math>q() \in\mathbb{R}</math> may depend on <math>x_i, y_i</math> as well but not on <math>w</math> except through <math>x_i'w</math>. Least squares obeys this rule, and so does [[logistic regression]], and most [[generalized linear model]]s. For instance, in least squares, <math>q(x_i'w) = y_i - x_i'w</math>, and in logistic regression <math>q(x_i'w) = y_i - S(x_i'w)</math>, where <math>S(u) = e^u/(1+e^u)</math> is the [[logistic function]]. In [[Poisson regression]], <math>q(x_i'w) = y_i - e^{x_i'w}</math>, and so on.
+
+In such settings, ISGD is simply implemented as follows:
+:<math>w^{new} = w^{old} + \xi x_i,\quad\xi = \eta q(x_i'w^{old} + \xi ||x_i||^2).</math>
+
+The scaling factor <math>\xi\in\mathbb{R}</math> can be found through [[bisection method]] since 
+in most regular models, such as the aforementioned generalized linear models, function <math>q()</math> is decreasing, 
+and thus the search bounds for <math>\xi</math> are 
+<math>[\min(0, b_i), \max(0, b_i)]</math>, where <math>b_i = \eta q(x_i'w^{old})</math>.
+
+===Momentum===
+Further proposals include the ''momentum method'', which appeared in [[David Rumelhart|Rumelhart]], [[Geoffrey Hinton|Hinton]] and [[Ronald J. Williams|Williams]]' seminal paper on backpropagation learning.<ref name="Rumelhart1986">{{cite journal|last=Rumelhart|first=David E.|author2=Hinton, Geoffrey E.|author3=Williams, Ronald J.|title=Learning representations by back-propagating errors|journal=Nature|date=8 October 1986|volume=323|issue=6088|pages=533–536|doi=10.1038/323533a0|bibcode=1986Natur.323..533R}}</ref> Stochastic gradient descent with momentum remembers the update {{math|Δ ''w''}} at each iteration, and determines the next update as a [[linear combination]] of the gradient and the previous update:<ref name="Sutskever2013">{{cite conference|last=Sutskever|first=Ilya|author2=Martens, James|author3=Dahl, George|author4=Hinton, Geoffrey E.|editor=Sanjoy Dasgupta and David Mcallester|title=On the importance of initialization and momentum in deep learning|conference=In Proceedings of the 30th international conference on machine learning (ICML-13)|date=June 2013|volume=28|location=Atlanta, GA|pages=1139–1147|url=http://www.cs.utoronto.ca/~ilya/pubs/2013/1051_2.pdf|access-date=14 January 2016}}</ref><ref name="SutskeverPhD">{{cite thesis|last=Sutskever|first=Ilya|title=Training recurrent neural networks|date=2013|publisher=University of Toronto|url=http://www.cs.utoronto.ca/~ilya/pubs/ilya_sutskever_phd_thesis.pdf|type=Ph.D.|page=74}}</ref>
+:<math>\Delta w := \alpha \Delta w - \eta \nabla Q_i(w)</math>
+:<math>w := w + \Delta w </math>
+that leads to:
+:<math>w := w - \eta \nabla Q_i(w) + \alpha \Delta w </math>
+
+where the [[parametric statistics|parameter]] <math>w</math> which minimizes <math>Q(w)</math> is to be [[estimator|estimated]], and <math>\eta</math> is a step size (sometimes called the ''[[learning rate]]'' in machine learning){{clarify|reason=What is alpha in this case??|date=October 2017}}.
+
+The name momentum stems from an analogy to [[momentum]] in physics: the weight vector <math>w</math>, thought of as a particle traveling through parameter space{{r|Rumelhart1986}}, incurs acceleration from the gradient of the loss ("[[force]]"). Unlike in classical stochastic gradient descent, it tends to keep traveling in the same direction, preventing oscillations. Momentum has been used successfully by computer scientists in the training of [[artificial neural networks]] for several decades.<ref name="Zeiler 2012">{{cite arXiv |last=Zeiler |first=Matthew D. |eprint=1212.5701 |title=ADADELTA: An adaptive learning rate method |year=2012|class=cs.LG }}</ref>
+
+===Averaging===
+''Averaged stochastic gradient descent'', invented independently by Ruppert and Polyak in the late 1980s, is ordinary stochastic gradient descent that records an average of its parameter vector over time. That is, the update is the same as for ordinary stochastic gradient descent, but the algorithm also keeps track of<ref>{{cite journal |last1=Polyak |first1=Boris T. |first2=Anatoli B. |last2=Juditsky |title=Acceleration of stochastic approximation by averaging |journal=SIAM J. Control Optim. |volume=30 |issue=4 |year=1992 |pages=838–855|url=http://www.meyn.ece.ufl.edu/archive/spm_files/Courses/ECE555-2011/555media/poljud92.pdf|doi=10.1137/0330046 }}</ref>
+
+:<math>\bar{w} = \frac{1}{t} \sum_{i=0}^{t-1} w_i</math>.
+
+When optimization is done, this averaged parameter vector takes the place of {{mvar|w}}.
+
+===AdaGrad===
+''AdaGrad'' (for adaptive [[Gradient descent|gradient]] algorithm) is a modified stochastic gradient descent with per-parameter [[learning rate]], first published in 2011.<ref name="duchi">{{cite journal |last1=Duchi |first1=John |first2=Elad |last2=Hazan |first3=Yoram |last3=Singer |title=Adaptive subgradient methods for online learning and stochastic optimization |journal=[[Journal of Machine Learning Research|JMLR]] |volume=12 |year=2011 |pages=2121–2159 |url=http://jmlr.org/papers/volume12/duchi11a/duchi11a.pdf}}</ref><ref>{{cite web |first=Joseph |last=Perla |year=2014 |title=Notes on AdaGrad |url=http://seed.ucsd.edu/mediawiki/images/6/6a/Adagrad.pdf |deadurl=yes |archiveurl=https://web.archive.org/web/20150330033637/http://seed.ucsd.edu/mediawiki/images/6/6a/Adagrad.pdf |archivedate=2015-03-30 |df= }}</ref> Informally, this increases the learning rate for sparser parameters and decreases the learning rate for ones that are less sparse. This strategy often improves convergence performance over standard stochastic gradient descent in settings where data is sparse and sparse parameters are more informative. Examples of such applications include natural language processing and image recognition.<ref name="duchi"/>  It still has a base learning rate {{mvar|η}}, but this is multiplied with the elements of a vector {{math|{''G''<sub>''j'',''j''</sub>} }} which is the diagonal of the [[outer product]] matrix
+
+:<math>G = \sum_{\tau=1}^t g_\tau g_\tau^\mathsf{T}</math>
+
+where <math>g_\tau = \nabla Q_i(w)</math>, the gradient, at iteration {{mvar|τ}}. The diagonal is given by
+
+:<math>G_{j,j} = \sum_{\tau=1}^t g_{\tau,j}^2</math>.
+
+This vector is updated after every iteration. The formula for an update is now
+
+:<math>w := w - \eta\, \mathrm{diag}(G)^{-\frac{1}{2}} \circ g</math>{{efn|<math>\circ</math> is the [[Hadamard product (matrices)|element-wise product]].}}
+
+or, written as per-parameter updates,
+
+:<math>w_j := w_j - \frac{\eta}{\sqrt{G_{j,j}}} g_j.</math>
+
+Each {{math|{''G''<sub>(''i'',''i'')</sub>} }} gives rise to a scaling factor for the learning rate that applies to a single parameter {{math|''w''<sub>''i''</sub>}}. Since the denominator in this factor, <math>\sqrt{G_i} = \sqrt{\sum_{\tau=1}^t g_\tau^2}</math> is the [[Norm (mathematics)#Euclidean norm|''ℓ''<sub>2</sub> norm]] of previous derivatives, extreme parameter updates get dampened, while parameters that get few or small updates receive higher learning rates.<ref name="Zeiler 2012"/>
+
+While designed for [[convex optimization|convex problems]], AdaGrad has been successfully applied to non-convex optimization.<ref>{{cite journal |last1=Gupta |first1=Maya R. |first2=Samy |last2=Bengio |first3=Jason |last3=Weston |title=Training highly multiclass classifiers |journal=JMLR |volume=15 |issue=1 |year=2014 |pages=1461–1492 |url=http://jmlr.org/papers/volume15/gupta14a/gupta14a.pdf}}</ref>
+
+===RMSProp===
+''RMSProp'' (for Root Mean Square Propagation) is also a method in which the [[learning rate]] is adapted for each of the parameters. The idea is to divide the learning rate for a weight by a running average of the magnitudes of recent gradients for that weight.<ref>Tieleman, Tijmen and Hinton, Geoffrey (2012). Lecture 6.5-rmsprop: Divide the gradient by a running average of its recent magnitude. COURSERA: Neural Networks for Machine Learning</ref> So, first the running average is calculated in terms of means square,
+
+:<math>v(w,t):=\gamma v(w,t-1)+(1-\gamma)(\nabla Q_i(w))^2</math>
+
+where, <math>\gamma</math> is the forgetting factor.
+
+And the parameters are updated as,
+
+:<math>w:=w-\frac{\eta}{\sqrt{v(w,t)}}\nabla Q_i(w)</math>
+
+RMSProp has shown excellent adaptation of learning rate in different applications. RMSProp can be seen as a generalization of [[Rprop]] and is capable to work with mini-batches as well opposed to only full-batches.<ref>{{Cite web|url=http://www.cs.toronto.edu/~tijmen/csc321/slides/lecture_slides_lec6.pdf|title=Overview of mini-batch gradient descent|last=Hinton|first=Geoffrey|authorlink=Geoffrey Hinton|date=|website=|publisher=|pages=27–29|access-date=27 September 2016}}</ref>
+
+===Adam===
+''Adam''<ref name="Adam2014">{{cite arXiv |last1=Diederik |first1=Kingma |first2=Jimmy |last2=Ba |eprint=1412.6980 |title=Adam: A method for stochastic optimization |year=2014 |class=cs.LG }}</ref> (short for Adaptive Moment Estimation) is an update to the ''RMSProp'' optimizer. In this optimization algorithm, running averages of both the gradients and the second moments of the gradients are used. Given parameters <math> w^ {(t)} </math> and a loss function <math> L ^ {(t)} </math>, where <math> t </math> indexes the current training iteration (indexed at <math> 0 </math>), Adam's parameter update is given by:
+
+:<math>m_w ^ {(t+1)} \leftarrow \beta_1 m_w ^ {(t)} + (1 - \beta_1) \nabla _w L ^ {(t)} </math>
+:<math>v_w ^ {(t+1)} \leftarrow \beta_2 v_w ^ {(t)} + (1 - \beta_2) (\nabla _w L ^ {(t)} )^2 </math>
+
+:<math>\hat{m}_w = \frac{m_w ^ {(t+1)}}{1 - (\beta_1) ^{t+1}} </math>
+:<math>\hat{v}_w = \frac{ v_w ^ {(t+1)}}{1 - (\beta_2) ^{t+1}} </math>
+
+:<math>w ^ {(t+1)} \leftarrow w ^ {(t)} - \eta \frac{\hat{m}_w}{\sqrt{\hat{v}_w} + \epsilon} </math>
+
+where <math>\epsilon</math> is a small scalar used to prevent division by 0, and <math>\beta_1</math> and <math>\beta_2</math> are the forgetting factors for gradients and second moments of gradients, respectively. Squaring and square-rooting is done elementwise.
+
+===Natural Gradient Descent and kSGD===
+Kalman-based Stochastic Gradient Descent (kSGD)<ref name=":0">{{Cite journal|last=Patel|first=V.|date=2016-01-01|title=Kalman-Based Stochastic Gradient Method with Stop Condition and Insensitivity to Conditioning|journal=SIAM Journal on Optimization|volume=26|issue=4|pages=2620–2648|doi=10.1137/15M1048239|issn=1052-6234|arxiv=1512.01139}}</ref> is an online and offline algorithm for learning parameters from statistical problems from [[quasi-likelihood]] models, which include [[Linear regression|linear models]], [[Nonlinear regression|non-linear models]], [[generalized linear model]]s, and [[Artificial neural network|neural networks]] with [[Mean squared error|squared error loss]] as special cases. For online learning problems, kSGD is a special case of the [[Kalman filter|Kalman Filter]] for linear regression problems, a special case of the [[Extended Kalman filter|Extended Kalman Filter]] for non-linear regression problems, and can be viewed as an incremental [[Gauss–Newton algorithm|Gauss-Newton]] method. Moreover, because of kSGD's relationship to the Kalman Filter and natural gradient descent's<ref>{{cite journal|last1=Cichocki|first1=A|last2=Chen|first2=T|last3=Amari|first3=S|title=Stability Analysis of Learning Algorithms for Blind Source Separation.|journal=Neural Networks|date=November 1997|volume=10|issue=8|pages=1345–1351|pmid=12662478|doi=10.1016/S0893-6080(97)00039-7}}</ref> relationship to the Kalman Filter,<ref>{{cite arxiv|last1=Yann|first1=Ollivier|title=Online Natural Gradient as a Kalman Filter|eprint=1703.00209|language=en|date=1 March 2017|class=stat.ML}}</ref> kSGD is a rigorous improvement over the popular natural gradient descent method.
+
+The benefits of kSGD, in comparison to other methods, are (1) it is not sensitive to the condition number of the problem ,{{efn|For the linear regression problem, kSGD's objective function discrepancy (i.e. the total of bias and variance) at iteration <math>k</math>  is <math>{\frac {1+\epsilon }{k}}p\sigma ^{2}</math>  with probability converging to 1 at a rate depending on <math>\epsilon \in (0,1)</math>, where <math>\sigma ^{2}</math>  is the variance of the residuals. Moreover, for specific choices of <math>\gamma _{1},\gamma _{2}</math>, kSGD's objective function bias at iteration <math>k</math>  can be shown to be <math>\frac {(1+\epsilon )^{2}}{2k^{2}}\Vert w(0)-w_{*}\Vert _{2}^{2}</math>  with probability converging to 1 at a rate depending on <math>\epsilon \in (0,1)</math>, where <math>w_{*}</math> is the optimal parameter.
+}} (2) it has a robust choice of hyperparameters, and (3) it has a stopping condition. The drawbacks of kSGD is that the algorithm requires storing a dense covariance matrix between iterations, and requires a matrix-vector product at each iteration.
+
+To describe the algorithm, suppose <math>Q_i(w)</math>, where <math>w \in \mathbb{R}^p</math> is defined by an example <math>(Y_i,X_i)\in \mathbb{R} \times \mathbb{R}^d</math> such that
+
+:<math>\nabla_w Q_i(w) = \frac{Y_i - \mu(X_i,w)}{V(\mu(X_i,w))} \nabla_w \mu(X_i,w)</math>
+
+where <math>\mu(X_i,w)</math> is mean function (i.e. the expected value of <math>Y_i</math> given <math>X_i</math>), and <math>V(\mu(X_i,w))</math> is the variance function (i.e. the variance of <math>Y_i</math> given <math>X_i</math>). Then, the parameter update, <math> w(t+1) </math>, and covariance matrix update, <math> M(t+1) </math> are given by the following
+
+:<math> p = \nabla_w \mu(X_{t+1},w(t)) </math>
+:<math> m = \mu(X_{t+1},w(t)) </math>
+:<math> v = M(t) p </math>
+:<math> s = \min\lbrace \gamma_1, \max\lbrace \gamma_2, V(m)\rbrace \rbrace + v^\mathsf{T} p </math>
+:<math> w(t+1) = w(t) + \frac{Y_{t+1} - m}{s}v </math>
+:<math> M(t+1) = M(t) - \frac{1}{s} v v^\mathsf{T} </math>
+
+where <math>\gamma_1,\gamma_2</math> are hyperparameters. The <math>M(t)</math> update can result in the covariance matrix becoming indefinite, which can be avoided at the cost of a matrix-matrix multiplication. <math>M(0)</math> can be any positive definite symmetric matrix, but is typically taken to be the identity. As noted by Patel,<ref name=":0" /> for all problems besides linear regression, restarts are required to ensure convergence of the algorithm, but no theoretical or implementation details were given. In a closely related, off-line, mini-batch method for non-linear regression analyzed by Bertsekas,<ref>{{Cite journal|last=Bertsekas|first=D.|date=1996-08-01|title=Incremental Least Squares Methods and the Extended Kalman Filter|journal=SIAM Journal on Optimization|volume=6|issue=3|pages=807–822|doi=10.1137/S1052623494268522|issn=1052-6234|hdl=1721.1/3362}}</ref> a forgetting factor was used in the covariance matrix update to prove convergence.
+
+===Second-Order Methods===
+It is known that a stochastic analogue of the standard (deterministic) Newton-Raphson algorithm (a “second-order” method) provides an asymptotically optimal or near-optimal form of iterative optimization in the setting of stochastic approximation. A method that uses direct measurements of the Hessian matrices of the summands in the empirical risk function is given in <ref>R. H. Byrd, S. L. Hansen, J. Nocedal, and Y. Singer, “A Stochastic Quasi-Newton method for Large-Scale Optimization,” SIAM Journal on Optimization, vol. 26, no. 2, pp. 1008–1031, 2016</ref>. However, directly determining the required Hessian matrices for optimization may not be possible in practice. Practical and theoretically sound methods for second-order versions of SGD that do not require direct Hessian information are given in <ref>J. C. Spall (2000), “Adaptive Stochastic Approximation by the Simultaneous Perturbation Method,” IEEE Transactions on Automatic Control, vol. 45, pp. 1839−1853. http://dx.doi.org/10.1109/TAC.2000.880982 </ref> <ref>J. C. Spall (2009), “Feedback and Weighting Mechanisms for Improving Jacobian Estimates in the Adaptive Simultaneous Perturbation Algorithm,” IEEE Transactions on Automatic Control, vol. 54(6), pp. 1216–1229. http://dx.doi.org/10.1109/TAC.2009.2019793 </ref> <ref>S. Bhatnagar, H. L. Prasad, and L. A. Prashanth (2013), Stochastic Recursive Algorithms for Optimization: Simultaneous Perturbation Methods. Springer.</ref>. (A less efficient method based on finite differences, instead of simultaneous perturbations, is given in <ref>D. Ruppert, “A Newton-Raphson Version of the Multivariate Robbins-Monro Procedure,” The Annals of Statistics, vol. 13, no. 1, pp. 236–245, 1985</ref>.) These methods not requiring direct Hessian information are based on either values of the summands in the above empirical risk function or values of the gradients of the summands (i.e., the SGD inputs). In particular, second-order optimality is asymptotically achievable without direct calculation of the Hessian matrices of the summands in the empirical risk function.   
+
+== Notes ==
+{{notelist}}
+
+== See also ==
+* [[Coordinate descent]] – changes one coordinate at a time, rather than one example
+* [[Linear classifier]]
+* [[Online machine learning]]
+
+== References ==
+{{reflist|30em}}
+
+== Further reading ==
+*{{Citation
+ | last = Bertsekas
+ | first = Dimitri P.
+ | author-link = Dimitri P. Bertsekas
+ | title = Nonlinear Programming
+ | publisher = Athena Scientific
+ | year = 1999
+ | edition = 2nd
+ | location = Cambridge, MA.
+ | isbn = 978-1-886529-00-7 
+ | ref = none
+}}.
+
+*{{Citation
+ | last = Bertsekas
+ | first = Dimitri
+ | author-link = Dimitri P. Bertsekas
+ | title = Convex Analysis and Optimization
+ | publisher = Athena Scientific
+ | year = 2003
+ | ref = none
+}}.
+
+*{{Citation
+ | last = Bottou
+ | first = Léon
+ | author-link = Léon Bottou
+ | contribution = Stochastic Learning
+ | year = 2004
+ | title = Advanced Lectures on Machine Learning
+ | pages = 146–168
+ | publisher = Springer
+ | series = LNAI
+ | volume = 3176
+ | url = http://leon.bottou.org/papers/bottou-mlss-2004
+ | isbn = 978-3-540-23122-6
+ | ref = none
+}}.
+
+*{{Citation
+ | last = Davidon
+ | first = W.C.
+ | author-link = William C. Davidon
+ | title = New least-square algorithms
+ | journal = Journal of Optimization Theory and Applications
+ | volume = 18
+ | year = 1976
+ | number = 2
+ | pages = 187–197
+ | doi = 10.1007/BF00935703
+ | mr=418461
+ | ref = none
+}}.
+
+*{{Citation
+ | title = Pattern Classification
+ | first1 = Richard O.
+ | last1 = Duda
+ | first2 = Peter E.
+ | last2 = Hart
+ | first3 = David G.
+ | last3 = Stork
+ | publisher = [[John Wiley & Sons|Wiley]]
+ | year = 2000
+ | edition = 2nd
+ | isbn = 978-0-471-05669-0
+ | ref = none
+}}.
+
+*{{Citation
+ | last = Kiwiel
+ | first = Krzysztof C.
+ | title = Convergence of approximate and incremental subgradient methods for convex optimization
+ | journal = SIAM Journal on Optimization
+ | volume = 14
+ | year = 2004
+ | number = 3
+ | pages = 807–840
+ | doi = 10.1137/S1052623400376366
+ | mr = 2085944
+ | ref = none
+}}. (Extensive list of references)
+
+*{{Citation
+ | title = Practical Mathematical Optimization - Basic Optimization Theory and Gradient-Based Algorithms|series=Springer Optimization and Its Applications Vol. 133
+ | first1 = Jan A.
+ | last1 = Snyman
+ | first2 = Daniel N.
+ | last2 = Wilke
+ | publisher = [[Springer International Publishing|Springer]]
+ | edition=2
+ | year = 2018
+ | pages=xxvi+372
+ | isbn = 978-3-319-77585-2
+ | url = https://www.springer.com/gp/book/9783319775852
+ | ref = none
+}}. (Python module [http://extras.springer.com/2018/978-3-319-77585-2 pmo.py])
+
+*{{Citation
+ | title = Introduction to Stochastic Search and Optimization
+ | first = James C.
+ | last = Spall
+ | publisher = [[John Wiley & Sons|Wiley]]
+ | year = 2003
+ | isbn = 978-0-471-33052-3
+ | ref = none
+}}.
+
+== External links ==
+* [http://codingplayground.blogspot.it/2013/05/stocastic-gradient-descent.html Using stochastic gradient descent in C++, Boost, Ublas for linear regression]
+* [http://studyofai.com/machine-learning-algorithms/ Machine Learning Algorithms]
+* {{cite web |work=3Blue1Brown |title=Gradient Descent, How Neural Networks Learn |date=October 16, 2017 |url=https://www.youtube.com/watch?v=IHZwWFHWa-w&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=2 |via=[[YouTube]] }}
+
+[[Category:Stochastic optimization]]
+[[Category:Computational statistics]]
+[[Category:Gradient methods]]
+[[Category:M-estimators]]
+[[Category:Machine learning algorithms]]
+[[Category:Convex optimization]]
+[[Category:Statistical approximations]]

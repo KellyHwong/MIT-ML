@@ -1,0 +1,17 @@
+'''随机梯度下降''' （简称SGD），是（比如，可微函数）。SGD中'''随机''' 意思是它使用随机选择（或者乱序后）的样本来估计梯度，因此SGD可看作梯度下降优化问题的随机估计。该思想至少可以追溯到1951<ref>{{cite journal | last = Mei | first = Song | title = A mean field view of the landscape of two-layer neural networks | journal = Proceedings of the National Academy of Sciences | volume =  115| issue =  33| year = 2018 | pages =  E7665–E7671| jstor =  | doi = 10.1073/pnas.1806579115 | pmid = 30054315 | pmc = 6099898 }}</ref>年，[[Herbert Robbins]] and [[Sutton Monro]]和著作的文章，"A Stochastic Approximation Method"，他们提出和详细分析了一种求根方法，即现在说的[[stochastic approximation|Robbins–Monro algorithm]]。
+
+== 背景 ==
+
+
+== 外部链接 ==
+* [http://codingplayground.blogspot.it/2013/05/stocastic-gradient-descent.html Using stochastic gradient descent in C++, Boost, Ublas for linear regression]
+* [http://studyofai.com/machine-learning-algorithms/ Machine Learning Algorithms]
+* {{cite web |work=3Blue1Brown |title=Gradient Descent, How Neural Networks Learn |date=October 16, 2017 |url=https://www.youtube.com/watch?v=IHZwWFHWa-w&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=2 |via=[[YouTube]] }}
+
+[[Category:Stochastic optimization]]
+[[Category:Computational statistics]]
+[[Category:Gradient methods]]
+[[Category:M-estimators]]
+[[Category:Machine learning algorithms]]
+[[Category:Convex optimization]]
+[[Category:Statistical approximations]]
