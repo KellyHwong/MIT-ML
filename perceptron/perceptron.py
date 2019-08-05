@@ -8,6 +8,10 @@ import os
 import numpy as np
 
 
+def algorithm(parameter_list):
+    pass
+
+
 def main():
     '''
     dataArr = [-0.2, -1.1, 0, 2.3, 4.5, 0.0]
