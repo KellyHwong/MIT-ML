@@ -9,8 +9,9 @@ import numpy as np
 import math
 
 
-def perception(samples, labels, epoch=1):
-    theta = len(samples[0]) * [0]
+def perception(samples, labels, theta=None, epoch=1):
+    if theta is None:
+        theta = len(samples[0]) * [0]
     theta = np.asarray(theta)
     for _ in range(epoch):
         for i, x in enumerate(samples):
@@ -38,19 +39,27 @@ def hw1(samples, labels, epoch=1):
 
 
 def hw2():
-    # sample = np.
-    n = 2  # n = d samples
-    d = 2
+    # d = 2  # 2次后收敛
+    d = 3  # 2次后收敛
+    n = d  # n = d samples
     xs = []
     for t in range(n):
         x = [0] * d
-        for i in range(1, d+1):
+        for i in range(d):
             if i == t:
-                x[i] = math.cos(math.pi*t)
+                x[i] = math.cos(math.pi*(t+1))
             else:
                 x[i] = 0
         xs.append(x)
-    print(xs)
+    # print(xs)
+
+    ys = [1] * d
+    theta = [0] * d
+    epoch = 4
+    for e in range(epoch):
+        for i, x in enumerate(xs):
+            theta = perception([x], [ys[i]], theta)
+            print(theta)
 
 
 def main():
