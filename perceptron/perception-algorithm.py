@@ -6,6 +6,7 @@
 
 import os
 import numpy as np
+import math
 
 
 def perception(samples, labels, epoch=1):
@@ -36,12 +37,29 @@ def hw1(samples, labels, epoch=1):
     return theta
 
 
+def hw2():
+    # sample = np.
+    n = 2  # n = d samples
+    d = 2
+    xs = []
+    for t in range(n):
+        x = [0] * d
+        for i in range(1, d+1):
+            if i == t:
+                x[i] = math.cos(math.pi*t)
+            else:
+                x[i] = 0
+        xs.append(x)
+    print(xs)
+
+
 def main():
     """
     theta = [1, 1]
     sample = [2, 2]
     ret = np.dot(theta, sample)
     print(ret)
+    """
     """
     # starts with data point  𝑥(1)
     x1 = [[-1, -1], [1, 0], [-1, 1.5]]
@@ -58,7 +76,9 @@ def main():
     x2 = [[1, 0], [-1, 10], [-1, -1]]
     y2 = [-1, 1, 1]  # mistakes 1
     # theta = hw1(x2, y2, epoch=3)
-    theta = hw1(x1, y1, epoch=10)
+    # theta = hw1(x1, y1, epoch=10)
+    """
+    hw2()
 
 
 if __name__ == "__main__":
