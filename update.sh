@@ -1,4 +1,4 @@
 #!/bin/sh
 git add -A
-git commit -am "hw3 perception algorithm code `date`"
+git commit -am "project1 code `date`"
 git push
