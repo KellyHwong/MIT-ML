@@ -37,7 +37,7 @@ test_bow_features = p1.extract_bow_feature_vectors(test_texts, dictionary)
 # -------------------------------------------------------------------------------
 # Problem 5
 # -------------------------------------------------------------------------------
-"""
+
 toy_features, toy_labels = toy_data = utils.load_toy_data('toy_data.tsv')
 
 T = 10
@@ -58,7 +58,8 @@ def plot_toy_results(algo_name, thetas):
 plot_toy_results('Perceptron', thetas_perceptron)
 plot_toy_results('Average Perceptron', thetas_avg_perceptron)
 plot_toy_results('Pegasos', thetas_pegasos)
-"""
+
+exit()
 # -------------------------------------------------------------------------------
 # Problem 7
 # -------------------------------------------------------------------------------

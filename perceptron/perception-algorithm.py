@@ -70,10 +70,10 @@ def main():
     print(ret)
     """
     """
-    # starts with data point  𝑥(1)
+    # starts with data point  ?(1)
     x1 = [[-1, -1], [1, 0], [-1, 1.5]]
     y1 = [1, -1, 1]
-    # starts with data point  𝑥(2)
+    # starts with data point  ?(2)
     x2 = [[1, 0], [-1, 1.5], [-1, -1]]
     y2 = [-1, 1, 1]
     # theta = hw1(x2, y2, epoch=3)
