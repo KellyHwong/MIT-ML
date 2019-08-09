@@ -1,4 +1,4 @@
 #!/bin/sh
 git add -A
-git commit -am "linear toy `date`"
+git commit -am "gen and svm `date`"
 git push
